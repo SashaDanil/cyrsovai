@@ -1,0 +1,43 @@
+<!-- templates/clients.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Клиенты</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Клиенты</h1>
+    <a href="/">На главную</a> | <a href="/add_client">Добавить клиента</a>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color: green;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th><th>Имя</th><th>Фамилия</th><th>Телефон</th>
+                <th>Email</th><th>Адрес</th><th>Бонусы</th><th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.id }}</td>
+                <td>{{ client.имя }}</td>
+                <td>{{ client.фамилия }}</td>
+                <td>{{ client.телефон }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.адрес }}</td>
+                <td>{{ client.бонусы }}</td>
+                <td>{{ client.категория }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

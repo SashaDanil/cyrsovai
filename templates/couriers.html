@@ -1,0 +1,43 @@
+<!-- templates/couriers.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Курьеры</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Курьеры</h1>
+    <a href="/">На главную</a> | <a href="/add_courier">Добавить курьера</a>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color: green;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th><th>Имя</th><th>Фамилия</th><th>Телефон</th>
+                <th>Email</th><th>Статус</th><th>Транспорт</th><th>Рейтинг</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for courier in couriers %}
+            <tr>
+                <td>{{ courier.id }}</td>
+                <td>{{ courier.имя }}</td>
+                <td>{{ courier.фамилия }}</td>
+                <td>{{ courier.телефон }}</td>
+                <td>{{ courier.email }}</td>
+                <td>{{ courier.статус }}</td>
+                <td>{{ courier.транспорт }}</td>
+                <td>{{ courier.рейтинг }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

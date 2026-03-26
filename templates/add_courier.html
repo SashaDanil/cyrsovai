@@ -1,0 +1,54 @@
+<!-- templates/add_courier.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить курьера</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Добавить курьера</h1>
+    <a href="/couriers">Назад к курьерам</a>
+    
+    <form method="post">
+        <p>
+            <label>Имя: *</label>
+            <input type="text" name="имя" required>
+        </p>
+        <p>
+            <label>Фамилия: *</label>
+            <input type="text" name="фамилия" required>
+        </p>
+        <p>
+            <label>Телефон: *</label>
+            <input type="text" name="телефон" required>
+        </p>
+        <p>
+            <label>Email:</label>
+            <input type="email" name="email">
+        </p>
+        <p>
+            <label>Статус:</label>
+            <select name="статус">
+                <option value="active">active</option>
+                <option value="offline">offline</option>
+                <option value="busy">busy</option>
+            </select>
+        </p>
+        <p>
+            <label>Транспорт:</label>
+            <input type="text" name="транспорт">
+        </p>
+        <p>
+            <label>Рейтинг:</label>
+            <input type="number" step="0.1" name="рейтинг" value="5.0">
+        </p>
+        <p>
+            <label>Занятость (количество заказов):</label>
+            <input type="number" name="занятость" value="0">
+        </p>
+        <p>
+            <input type="submit" value="Добавить">
+        </p>
+    </form>
+</body>
+</html>

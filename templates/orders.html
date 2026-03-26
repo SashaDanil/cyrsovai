@@ -1,0 +1,44 @@
+<!-- templates/orders.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Заказы</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Заказы</h1>
+    <a href="/">На главную</a> | <a href="/add_order">Добавить заказ</a>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color: green;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th><th>Клиент</th><th>Курьер</th>
+                <th>Дата заказа</th><th>Дата доставки</th>
+                <th>Статус</th><th>Сумма</th><th>Способ оплаты</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.клиент_имя }} {{ order.клиент_фамилия }}</td>
+                <td>{{ order.курьер_имя }} {{ order.курьер_фамилия }}</td>
+                <td>{{ order.дата_заказа }}</td>
+                <td>{{ order.дата_доставки or '-' }}</td>
+                <td>{{ order.статус }}</td>
+                <td>{{ order.сумма }}</td>
+                <td>{{ order.способ_оплаты }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
