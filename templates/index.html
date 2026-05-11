@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доставка еды - Главная</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">🍕 Доставка Еды</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            {% if session.username %}
+                <a href="/profile">Профиль</a>
+                <a href="/my_orders">Мои заказы</a>
+                <a href="/cart">Корзина {% if cart_count > 0 %}({{ cart_count }}){% endif %}</a>
+                <a href="/logout">Выйти ({{ session.username }})</a>
+            {% else %}
+                <a href="/login">Вход</a>
+                <a href="/register">Регистрация</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <h1>🍽️ Наше меню</h1>
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.название }}</h3>
+                <p class="description">{{ product.описание or 'Нет описания' }}</p>
+                <p class="price">{{ product.цена }} ₽</p>
+                <p class="weight">Вес: {{ product.вес }} кг</p>
+                <form action="/add_to_cart/{{ product.id }}" method="POST">
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.наличие }}">
+                    <button type="submit">🛒 В корзину</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

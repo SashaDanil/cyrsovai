@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отслеживание заказа #{{ order.id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .track-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            position: relative;
+        }
+        .status-steps::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #ddd;
+            z-index: 1;
+        }
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+            background: white;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ddd;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+        .step.active .step-icon {
+            background: #27ae60;
+            color: white;
+            transform: scale(1.1);
+        }
+        .step.completed .step-icon {
+            background: #27ae60;
+            color: white;
+        }
+        .step.cancelled .step-icon {
+            background: #e74c3c;
+            color: white;
+        }
+        .step-label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .order-info {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .courier-info {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        .update-status-btn {
+            background: #e67e22;
+        }
+        .update-status-btn:hover {
+            background: #d35400;
+        }
+        .back-btn {
+            background: #95a5a6;
+        }
+        .back-btn:hover {
+            background: #7f8c8d;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .status-pending { background: #f39c12; color: white; }
+        .status-in_progress { background: #3498db; color: white; }
+        .status-delivered { background: #27ae60; color: white; }
+        .status-cancelled { background: #e74c3c; color: white; }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .info-text {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #c3e6cb;
+        }
+        .cancelled-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">🍕 Доставка Еды</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/my_orders">Мои заказы</a>
+            <a href="/cart">Корзина</a>
+            <a href="/logout">Выйти</a>
+        </div>
+    </nav>
+    <main>
+        <div class="track-container">
+            <h1>📦 Отслеживание заказа #{{ order.id }}</h1>
+            
+            <div class="order-info">
+                <p><strong>Дата заказа:</strong> {{ order.дата_заказа }}</p>
+                <p><strong>Сумма:</strong> {{ order.сумма }} ₽</p>
+                <p><strong>Способ оплаты:</strong> {{ order.способ_оплаты }}</p>
+                <p><strong>Статус:</strong> <span class="status-badge status-{{ order.статус.replace('_', '-') }}">{{ order.статус }}</span></p>
+            </div>
+
+            <div class="status-steps">
+                <div class="step 
+                    {% if order.статус == 'cancelled' %}cancelled
+                    {% elif order.статус == 'pending' %}active
+                    {% elif order.статус in ['in_progress', 'delivered'] %}completed
+                    {% endif %}">
+                    <div class="step-icon">📝</div>
+                    <div class="step-label">Заказ принят</div>
+                </div>
+                <div class="step 
+                    {% if order.статус == 'cancelled' %}cancelled
+                    {% elif order.статус == 'in_progress' %}active
+                    {% elif order.статус == 'delivered' %}completed
+                    {% endif %}">
+                    <div class="step-icon">🛵</div>
+                    <div class="step-label">В пути</div>
+                </div>
+                <div class="step 
+                    {% if order.статус == 'cancelled' %}cancelled
+                    {% elif order.статус == 'delivered' %}active completed
+                    {% endif %}">
+                    <div class="step-icon">✅</div>
+                    <div class="step-label">Доставлен</div>
+                </div>
+            </div>
+
+            {% if order.курьер_id %}
+            <div class="courier-info">
+                <h3>🛵 Информация о курьере</h3>
+                <p><strong>Имя:</strong> {{ order.курьер_имя }} {{ order.курьер_фамилия }}</p>
+                <p><strong>Транспорт:</strong> {{ order.транспорт }}</p>
+                <p><strong>Рейтинг:</strong> ⭐ {{ order.рейтинг }}</p>
+                <p><strong>Телефон:</strong> {{ order.курьер_телефон }}</p>
+            </div>
+            {% else %}
+            <div class="courier-info">
+                <p>⏳ Курьер ещё не назначен. Он будет назначен при первом обновлении статуса.</p>
+            </div>
+            {% endif %}
+
+            {% if order.дата_доставки %}
+            <div class="order-info">
+                <p><strong>Дата доставки:</strong> {{ order.дата_доставки }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Сообщение для доставленного заказа -->
+            {% if order.статус == 'delivered' %}
+            <div class="success-message">
+                🎉 <strong>Заказ доставлен!</strong> Спасибо, что выбрали нашу доставку!
+            </div>
+            {% endif %}
+
+            <!-- Сообщение для отменённого заказа -->
+            {% if order.статус == 'cancelled' %}
+            <div class="cancelled-message">
+                ⚠️ <strong>Заказ отменён</strong><br>
+                Если у вас есть вопросы, пожалуйста, свяжитесь с нашей службой поддержки.
+            </div>
+            {% endif %}
+
+            <div class="button-group">
+                
+                {% if session.role == 'client' %}
+                    {% if order.статус == 'pending' or order.статус == 'in_progress' %}
+                        <!-- Если заказ в процессе - показываем кнопку обновления статуса -->
+                        <a href="/update_order_status_step/{{ order.id }}" class="refresh-btn update-status-btn" style="text-decoration: none;">
+                            {% if order.статус == 'pending' %}
+                                📦 Отправить в доставку
+                            {% elif order.статус == 'in_progress' %}
+                                ✅ Подтвердить доставку
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        <!-- Если заказ доставлен или отменён - показываем кнопку "Назад" -->
+                        <a href="/my_orders" class="refresh-btn back-btn" style="text-decoration: none;">🔙 Назад к заказам</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+
+        </div>
+    </main>
+
+    <script>
+        // Получаем статус заказа из переданных данных
+        var orderStatus = "{{ order.статус }}";
+        
+        // Автоматическое обновление страницы каждые 10 секунд (только для активных заказов)
+        if (orderStatus === 'pending' || orderStatus === 'in_progress') {
+            setTimeout(function() {
+                location.reload();
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

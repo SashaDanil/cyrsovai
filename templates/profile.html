@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">🍕 Доставка Еды</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/my_orders">Мои заказы</a>
+            <a href="/cart">Корзина</a>
+            <a href="/logout">Выйти</a>
+        </div>
+    </nav>
+    <main>
+        <h1>👤 Мой профиль</h1>
+        <div class="profile-card">
+            <p><strong>{{ client.имя }} {{ client.фамилия }}</strong></p>
+            <p>📞 {{ client.телефон }}</p>
+            <p>✉️ {{ client.email or 'Не указан' }}</p>
+            <p>🏠 {{ client.адрес or 'Не указан' }}</p>
+            <p>🎁 Бонусов: {{ client.бонусы }}</p>
+            <p>⭐ Категория: {{ client.категория }}</p>
+        </div>
+    </main>
+</body>
+</html>

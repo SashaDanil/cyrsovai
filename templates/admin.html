@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .admin-stats { display: flex; gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #f0f0f0; padding: 15px; border-radius: 10px; flex: 1; text-align: center; }
+        .stat-card h3 { margin: 0; font-size: 28px; color: #2c3e50; }
+        .admin-section { background: white; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .admin-section h2 { margin-top: 0; color: #e67e22; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #2c3e50; color: white; }
+        select, input, button { padding: 5px 10px; margin: 5px; }
+        .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .status-pending { background: orange; color: white; }
+        .status-delivered { background: green; color: white; }
+        .status-in_progress { background: blue; color: white; }
+        .status-cancelled { background: red; color: white; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">👑 Админ-панель</div>
+        <div class="nav-links">
+            <a href="/admin">Главная</a>
+            <a href="/">На сайт</a>
+            <a href="/logout">Выйти</a>
+        </div>
+    </nav>
+    <main>
+        <h1>Панель управления</h1>
+        
+        <div class="admin-stats">
+            <div class="stat-card"><h3>{{ total_orders }}</h3><p>Всего заказов</p></div>
+            <div class="stat-card"><h3>{{ total_clients }}</h3><p>Клиентов</p></div>
+            <div class="stat-card"><h3>{{ total_couriers }}</h3><p>Курьеров</p></div>
+            <div class="stat-card"><h3>{{ "%.0f"|format(total_revenue) }} ₽</h3><p>Выручка</p></div>
+        </div>
+
+        <!-- Заказы -->
+        <div class="admin-section">
+            <h2>📋 Управление заказами</h2>
+            <table>
+                <tr><th>ID</th><th>Клиент</th><th>Сумма</th><th>Статус</th><th>Курьер</th><th>Действия</th></tr>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.клиент_имя or '?' }} {{ order.клиент_фамилия or '' }}</td>
+                    <td>{{ order.сумма }} ₽</td>
+                    <td><span class="status-badge status-{{ order.статус.replace('_', '-') }}">{{ order.статус }}</span></td>
+                    <td>{{ order.курьер_имя or 'Не назначен' }} {{ order.курьер_фамилия or '' }}</td>
+                    <td>
+                        <form method="POST" action="/admin/update_order_status" style="display: inline;">
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <select name="status">
+                                <option value="pending" {% if order.статус == 'pending' %}selected{% endif %}>pending</option>
+                                <option value="in_progress" {% if order.статус == 'in_progress' %}selected{% endif %}>in_progress</option>
+                                <option value="delivered" {% if order.статус == 'delivered' %}selected{% endif %}>delivered</option>
+                                <option value="cancelled" {% if order.статус == 'cancelled' %}selected{% endif %}>cancelled</option>
+                            </select>
+                            <select name="courier_id">
+                                <option value="">Без курьера</option>
+                                {% for c in couriers %}
+                                <option value="{{ c.id }}" {% if order.курьер_id == c.id %}selected{% endif %}>{{ c.имя }} {{ c.фамилия }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit">Обновить</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- Товары -->
+        <div class="admin-section">
+            <h2>🍕 Управление товарами</h2>
+            <form method="POST" action="/admin/add_product" style="margin-bottom: 20px;">
+                <input type="text" name="name" placeholder="Название" required>
+                <input type="text" name="description" placeholder="Описание">
+                <input type="number" step="0.01" name="price" placeholder="Цена" required>
+                <input type="text" name="category" placeholder="Категория">
+                <input type="number" step="0.1" name="weight" placeholder="Вес">
+                <input type="number" name="stock" placeholder="Количество" value="0">
+                <button type="submit">➕ Добавить товар</button>
+            </form>
+            <table>
+                <tr><th>ID</th><th>Название</th><th>Цена</th><th>Наличие</th><th>Действия</th></tr>
+                {% for p in products %}
+                <tr>
+                    <form method="POST" action="/admin/update_product/{{ p.id }}">
+                        <td>{{ p.id }}</td>
+                        <td><input type="text" name="name" value="{{ p.название }}"></td>
+                        <td><input type="number" step="0.01" name="price" value="{{ p.цена }}"></td>
+                        <td><input type="number" name="stock" value="{{ p.наличие }}"></td>
+                        <td>
+                            <button type="submit">💾</button>
+                            <a href="/admin/delete_product/{{ p.id }}" onclick="return confirm('Удалить?')">🗑️</a>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- Курьеры -->
+        <div class="admin-section">
+            <h2>🛵 Управление курьерами</h2>
+            <form method="POST" action="/admin/add_courier" style="margin-bottom: 20px;">
+                <input type="text" name="name" placeholder="Имя" required>
+                <input type="text" name="surname" placeholder="Фамилия" required>
+                <input type="text" name="phone" placeholder="Телефон" required>
+                <input type="email" name="email" placeholder="Email">
+                <select name="transport">
+                    <option value="пешком">Пешком</option>
+                    <option value="велосипед">Велосипед</option>
+                    <option value="мотоцикл">Мотоцикл</option>
+                    <option value="автомобиль">Автомобиль</option>
+                </select>
+                <button type="submit">➕ Добавить курьера</button>
+            </form>
+            <table>
+                <tr><th>ID</th><th>Имя</th><th>Транспорт</th><th>Статус</th><th>Занятость</th><th>Действия</th></tr>
+                {% for c in couriers %}
+                <tr>
+                    <form method="POST" action="/admin/update_courier/{{ c.id }}">
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.имя }} {{ c.фамилия }}</td>
+                        <td>{{ c.транспорт }}</td>
+                        <td>
+                            <select name="status">
+                                <option value="active" {% if c.статус == 'active' %}selected{% endif %}>active</option>
+                                <option value="busy" {% if c.статус == 'busy' %}selected{% endif %}>busy</option>
+                                <option value="offline" {% if c.статус == 'offline' %}selected{% endif %}>offline</option>
+                            </select>
+                        </td>
+                        <td><input type="number" name="занятость" value="{{ c.занятость }}" style="width: 60px;"></td>
+                        <td>
+                            <button type="submit">💾</button>
+                            <a href="/admin/delete_courier/{{ c.id }}" onclick="return confirm('Удалить курьера?')">🗑️</a>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </main>
+</body>
+</html>

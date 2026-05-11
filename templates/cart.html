@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">🍕 Доставка Еды</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/cart">Корзина</a>
+            <a href="/logout">Выйти</a>
+        </div>
+    </nav>
+    <main>
+        <h1>🛒 Ваша корзина</h1>
+        {% if cart %}
+        <table class="cart-table">
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+                <th></th>
+            </tr>
+            {% for id, item in cart.items() %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }} ₽</td>
+                <td>
+                    <form action="/update_cart/{{ id }}" method="POST" style="display: inline;">
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="0" style="width: 60px;">
+                        <button type="submit">Изменить</button>
+                    </form>
+                </td>
+                <td>{{ "%.2f"|format(item.price * item.quantity) }} ₽</td>
+                <td><a href="/remove_from_cart/{{ id }}" class="remove-btn">❌</a></td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3">Итого:</td>
+                <td colspan="2">{{ "%.2f"|format(total) }} ₽</td>
+            </tr>
+        </table>
+        <form action="/checkout" method="POST">
+            <select name="payment_method" required>
+                <option value="cash">Наличными при получении</option>
+                <option value="card">Картой онлайн</option>
+                <option value="online">Онлайн-оплата</option>
+            </select>
+            <button type="submit" class="checkout-btn">Оформить заказ</button>
+        </form>
+        {% else %}
+        <p>Корзина пуста. <a href="/">Вернуться к покупкам</a></p>
+        {% endif %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои заказы</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">🍕 Доставка Еды</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/profile">Профиль</a>
+            <a href="/my_orders">Мои заказы</a>
+            <a href="/cart">Корзина</a>
+            <a href="/logout">Выйти</a>
+        </div>
+    </nav>
+    <main>
+        <h1>📦 Мои заказы</h1>
+        <div class="orders-list">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <strong>Заказ #{{ order.id }}</strong>
+                    <span class="status {{ order.статус }}">{{ order.статус }}</span>
+                </div>
+                <div class="order-details">
+                    <p>Дата: {{ order.дата_заказа }}</p>
+                    <p>Сумма: {{ order.сумма }} ₽</p>
+                    <p>Оплата: {{ order.способ_оплаты }}</p>
+                    {% if order.курьер_имя %}
+                    <p>Курьер: {{ order.курьер_имя }} {{ order.курьер_фамилия }}</p>
+                    {% endif %}
+                    {% if order.примечания %}<p>Примечание: {{ order.примечания }}</p>{% endif %}
+                    <a href="/track_order/{{ order.id }}" class="btn" style="display: inline-block; margin-top: 10px;">📍 Отследить</a>
+                </div>
+            </div>
+            {% else %}
+            <p>У вас пока нет заказов</p>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
